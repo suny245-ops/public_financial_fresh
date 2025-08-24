@@ -41,7 +41,7 @@ df = pd.DataFrame(DATA)
 import urllib.parse
 
 SAFE_DOMAINS = {"gov.kr", "bokjiro.go.kr", "work24.go.kr", "hrd.go.kr", "myhome.go.kr", "molit.go.kr", "kinfa.or.kr"}
-safe_only = st.sidebar.toggle("검증된 링크만 보기", value=True)
+safe_only = st.sidebar.toggle("검증된 링크만 보기", value=False)
 
 def is_safe(row):
     try:
@@ -114,26 +114,29 @@ def sort_df(d: pd.DataFrame) -> pd.DataFrame:
 perfect = sort_df(res[res["eligibility_score"] == 4].copy())
 near = sort_df(res[res["eligibility_score"] == 3].copy())
 
-col1, col2 = st.columns(2)
-with col1:
-    st.subheader(f"✅ 완전 적합 ({len(perfect)}건)")
-    if perfect.empty:
-        st.info("완전 적합 항목이 없습니다.")
+# 세로 배치
+st.subheader(f"✅ 완전 적합 ({len(perfect)}건)")
+if perfect.empty:
+    st.info("완전 적합 항목이 없습니다.")
+else:
+    st.dataframe(
+        perfect[["name","category","benefit","why_fit","popularity","difficulty","apply_url","ok_reasons"]]
+        .reset_index(drop=True),
+        use_container_width=True,
+        height=260,
+    )
+
+if show_near:
+    st.subheader(f"🟡 거의 적합 ({len(near)}건)")
+    if near.empty:
+        st.info("거의 적합 항목이 없습니다.")
     else:
         st.dataframe(
-            perfect[["name","category","benefit","why_fit","popularity","difficulty","apply_url","ok_reasons"]]
-            .reset_index(drop=True), use_container_width=True
+            near[["name","category","benefit","why_fit","popularity","difficulty","apply_url","miss_reasons"]]
+            .reset_index(drop=True),
+            use_container_width=True,
+            height=260,
         )
-with col2:
-    if show_near:
-        st.subheader(f"🟡 거의 적합 ({len(near)}건)")
-        if near.empty:
-            st.info("거의 적합 항목이 없습니다.")
-        else:
-            st.dataframe(
-                near[["name","category","benefit","why_fit","popularity","difficulty","apply_url","miss_reasons"]]
-                .reset_index(drop=True), use_container_width=True
-            )
 
 st.caption(f"입력: 나이 {age}세 / 연소득 {income}만원 / {home} / {emp} · 정렬: {sort_by}")
 st.divider()
@@ -147,12 +150,12 @@ if "chat" not in st.session_state:
     st.session_state.chat = []
 
 # 모드 선택
-use_llm = st.checkbox("LLM 모드 사용 (OpenAI API 키 필요)", value=False, help="환경변수 OPENAI_API_KEY 설정 시 사용 가능")
+# LLM 항상 사용(키가 있으면), 없으면 자동 폴백
 api_key_present = bool(os.getenv("OPENAI_API_KEY"))
+use_llm = api_key_present
+if not api_key_present:
+    st.caption("※ OPENAI_API_KEY가 없어 코치는 규칙 기반으로 동작합니다.")
 
-if use_llm and not api_key_present:
-    st.warning("OPENAI_API_KEY 환경변수가 없어 LLM 모드를 사용할 수 없습니다. 규칙 기반으로 동작합니다.")
-    use_llm = False
 
 # 규칙 기반 빠른 답변 (키워드 룰)
 def rule_based_answer(q: str) -> str:
@@ -261,5 +264,6 @@ if user_msg:
     st.session_state.chat.append(("assistant", answer))
     with st.chat_message("assistant"):
         st.markdown(answer)
+
 
 
