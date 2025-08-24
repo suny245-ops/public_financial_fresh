@@ -138,60 +138,88 @@ if use_llm and not api_key_present:
 
 # 규칙 기반 빠른 답변 (키워드 룰)
 def rule_based_answer(q: str) -> str:
-    q = (q or "").lower()
-    # 데이터에서 프로그램명/키워드 매칭해 간단 요약 제공
+    q = (q or "").lower().strip()
+
+    # 현재 프로필 요약
+    header = f"**내 프로필**: 나이 {age}세 · 연소득 {income}만원 · {home} · {emp}\n"
+
+    # 1) 키워드로 특정 제도/상품 직접 조회
     for _, r in df.iterrows():
-        if any(k in q for k in [r["name"].lower().replace(" ", ""), r["name"].lower()]):
-            return (f"• {r['name']} ({r['category']})\n"
-                    f"  - 혜택: {r['benefit']}\n"
-                    f"  - 적합: {r['why_fit']}\n"
-                    f"  - 신청/안내: {r['apply_url']}\n"
-                    "※ 실제 자격은 공식 안내에서 확인하세요.")
-    if ("무주택" in q) or ("전세" in q) or ("월세" in q) or ("주거" in q):
-        return ("무주택/주거 관련:\n"
-                "- 청년 전월세보증금 대출: 연령·소득 요건 시 저금리 보증금 대출\n"
-                "- 청년월세지원: 지자체별 월세 지원(예: 월 최대 20만원, 12개월)\n"
-                "상단 표에서 본인 조건 결과를 확인하고 ‘apply_url’로 이동하세요.")
-    if ("교육" in q) or ("자격" in q) or ("훈련" in q):
-        return ("교육/자격 관련:\n"
-                "- 내일배움카드: 최대 500만원 훈련비(분야별 상이)\n"
-                "- 국민취업지원제도: 구직활동 지원금 + 취업알선\n"
-                "상단 추천 결과에서 세부 조건을 확인하세요.")
-    if ("소득" in q) or ("연봉" in q):
-        return ("소득 입력 팁: ‘연소득(만원)’ 슬라이더를 실제 값에 맞추면\n"
-                "상단 표의 완전/거의 적합이 자동 반영됩니다.")
-    if ("신청" in q) or ("서류" in q) or ("방법" in q):
-        return ("신청 가이드(일반): 신분증, 소득·재직 증빙, 임대차계약서(주거), 훈련계획(교육) 등이 필요할 수 있습니다.\n"
-                "각 항목의 ‘apply_url’에서 최신 공지와 서류 목록을 확인하세요.")
-    return ("상단 입력(나이/소득/주거/재직)을 조절하면 추천이 갱신됩니다.\n"
-            "특정 제도를 묻고 싶다면: 예) '내일배움카드 신청서류 알려줘'")
+        key = r["name"].lower().replace(" ", "")
+        if key in q or r["name"].lower() in q:
+            return (
+                header +
+                f"\n### {r['name']} ({r['category']})\n"
+                f"- 혜택: {r['benefit']}\n"
+                f"- 적합 사유: {r['why_fit']}\n"
+                f"- 신청/안내: {r['apply_url']}\n"
+                "\n※ 실제 요건은 공식 안내에서 최종 확인하세요."
+            )
+
+    # 2) 프로필과 매칭된 결과 기반 추천(완전 적합 → 거의 적합 순)
+    def fmt_rows(tbl, title):
+        if tbl.empty:
+            return f"**{title}**: 해당 없음\n"
+        lines = [f"**{title} ({len(tbl)}건)**"]
+        for r in tbl[["name","category","benefit","apply_url"]].itertuples(index=False):
+            lines.append(f"- **{r.name}** ({r.category}) — {r.benefit}  \n  ▶ {r.apply_url}")
+        return "\n".join(lines) + "\n"
+
+    # 질문에 주거/무주택 뉘앙스가 있으면 주거 관련 먼저 보여주기
+    wants_housing = any(k in q for k in ["무주택","전세","월세","주거","보증금","청약","집"])
+    pf = perfect.copy()
+    nr = near.copy()
+    if wants_housing:
+        pf = pf.sort_values(by=pf["name"].str.contains("전월세|월세|주거|청약"), ascending=False)
+        nr = nr.sort_values(by=nr["name"].str.contains("전월세|월세|주거|청약"), ascending=False)
+
+    body = fmt_rows(pf, "✅ 완전 적합") + "\n" + fmt_rows(nr, "🟡 거의 적합")
+
+    # 3) 아무 매칭도 없으면 힌트
+    if pf.empty and nr.empty:
+        hint = (
+            "\n적합 항목이 없어요. 아래를 확인해 보세요.\n"
+            "- 연소득(만원)을 실제보다 높게 넣진 않았는지\n"
+            "- ‘주거상태’가 무주택/보유 중 어디에 해당하는지\n"
+            "- 정렬/필터를 바꿔보기\n"
+        )
+    else:
+        hint = "\n각 항목의 링크로 이동하여 최신 요건·서류를 확인하세요."
+
+    return header + "\n" + body + hint
+
 
 # LLM 호출 (선택)
 def llm_answer(q: str) -> str:
     from openai import OpenAI
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    # 컨텍스트: 사용자 프로필 + 추천 요약(상위 5개만)
-    def topn(tbl, n=5):
+
+    def topn(tbl, n=6):
         if tbl.empty: return "없음"
-        view = tbl[["name","category","benefit","apply_url"]].head(n)
-        return "\n".join([f"- {r.name}: {r.category}, {r.benefit} (링크: {r.apply_url})"
-                          for r in view.itertuples(index=False)])
+        rows = []
+        for r in tbl[["name","category","benefit","apply_url"]].head(n).itertuples(index=False):
+            rows.append(f"- {r.name} ({r.category}) — {r.benefit} (링크: {r.apply_url})")
+        return "\n".join(rows)
+
     context = (
         f"[사용자 프로필] 나이={age}, 소득(만원)={income}, 주거={home}, 재직={emp}\n"
-        f"[완전 적합] \n{topn(perfect)}\n"
-        f"[거의 적합] \n{topn(near)}\n"
-        "규칙: 추정/단정 금지, 거짓 금지, 모르면 공식 링크 확인 유도. 간결하게 한국어로."
+        f"[완전 적합]\n{topn(perfect)}\n"
+        f"[거의 적합]\n{topn(near)}\n"
+        "규칙: 사실만 답하고, 모르면 공식 링크 확인하도록 안내. 과장/추정/단정 금지. 간결하고 한국어로."
     )
+
     messages = [
-        {"role":"system","content":"너는 청년 정책·금융 가이드를 한국어로 간결하게 제공하는 코치봇이다. 거짓말 금지."},
+        {"role":"system","content":"너는 청년 정책·금융 가이드를 한국어로 간결하게 제공하는 코치봇이다. 허위 정보 금지."},
         {"role":"user","content": f"{context}\n\n질문: {q}"}
     ]
     resp = client.chat.completions.create(
-        model="gpt-4o-mini",  # 계정 보유 모델로 변경 가능
+        model="gpt-4o-mini",
         messages=messages,
         temperature=0.2,
+        max_tokens=600,
     )
     return resp.choices[0].message.content.strip()
+
 
 # 채팅 UI
 for role, content in st.session_state.chat:
@@ -215,3 +243,4 @@ if user_msg:
     st.session_state.chat.append(("assistant", answer))
     with st.chat_message("assistant"):
         st.markdown(answer)
+
