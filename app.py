@@ -1,3 +1,5 @@
+from openai import OpenAI
+
 # app.py — 청년 맞춤형 정책 추천 (Streamlit / near-miss + 코치봇)
 import os
 import re
@@ -149,12 +151,17 @@ st.header("AI 금융 코치")
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
-# 모드 선택
 # LLM 항상 사용(키가 있으면), 없으면 자동 폴백
-api_key_present = bool(os.getenv("OPENAI_API_KEY"))
+def _get_api_key():
+    # Streamlit Secrets 우선, 없으면 환경변수 사용
+    return st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+
+api_key = _get_api_key()
+api_key_present = bool(api_key)
 use_llm = api_key_present
 if not api_key_present:
     st.caption("※ OPENAI_API_KEY가 없어 코치는 규칙 기반으로 동작합니다.")
+
 
 
 # 규칙 기반 빠른 답변 (키워드 룰)
@@ -212,8 +219,8 @@ def rule_based_answer(q: str) -> str:
 
 # LLM 호출 (선택)
 def llm_answer(q: str) -> str:
-    from openai import OpenAI
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(api_key=api_key)  # 위에서 읽은 api_key 사용
+
 
     def topn(tbl, n=6):
         if tbl.empty: return "없음"
@@ -264,6 +271,7 @@ if user_msg:
     st.session_state.chat.append(("assistant", answer))
     with st.chat_message("assistant"):
         st.markdown(answer)
+
 
 
 
