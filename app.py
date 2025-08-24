@@ -37,6 +37,24 @@ DATA = [
 df = pd.DataFrame(DATA)
 
 # ─────────────────────────────────────────────────────────
+# 안전 링크 필터 추가
+import urllib.parse
+
+SAFE_DOMAINS = {"gov.kr", "bokjiro.go.kr", "work24.go.kr", "hrd.go.kr", "myhome.go.kr", "molit.go.kr", "kinfa.or.kr"}
+safe_only = st.sidebar.toggle("검증된 링크만 보기", value=True)
+
+def is_safe(row):
+    try:
+        dom = urllib.parse.urlparse(row["apply_url"]).netloc
+        dom = dom.split(":")[0].replace("www.", "")
+        return any(dom.endswith(d) for d in SAFE_DOMAINS)
+    except Exception:
+        return False
+
+if safe_only:
+    df = df[df.apply(is_safe, axis=1)]
+
+# ─────────────────────────────────────────────────────────
 # 사이드바 입력
 st.sidebar.header("내 프로필")
 age = st.sidebar.slider("나이", 18, 45, 27, 1)
@@ -243,4 +261,5 @@ if user_msg:
     st.session_state.chat.append(("assistant", answer))
     with st.chat_message("assistant"):
         st.markdown(answer)
+
 
