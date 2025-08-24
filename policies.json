@@ -1,0 +1,52 @@
+[
+  {
+    "id": "tomorrow_learning_card",
+    "name": "국민내일배움카드",
+    "category": "지원제도",
+    "benefit": "직업훈련비 지원(자부담 완화 등)",
+    "apply_url": "https://m.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systId=SI00000316",
+    "source_domain": "work24.go.kr",
+    "last_verified": "2025-08-24",
+    "verified": true
+  },
+  {
+    "id": "youth_leap_account",
+    "name": "청년도약계좌",
+    "category": "금융상품",
+    "benefit": "5년 적립 + 정부기여금 + 비과세",
+    "apply_url": "https://www.kinfa.or.kr/financialProduct/youthLeapAccount.do",
+    "source_domain": "kinfa.or.kr",
+    "last_verified": "2025-08-24",
+    "verified": true
+  },
+  {
+    "id": "youth_jeonse_loan",
+    "name": "청년전용 버팀목 전세자금대출",
+    "category": "금융상품",
+    "benefit": "소득요건 충족 시 저금리 전세자금",
+    "apply_url": "https://www.myhome.go.kr/hws/portal/cont/selectYouthPolicyYouthOnlyCrutchLoanView.do",
+    "source_domain": "myhome.go.kr",
+    "last_verified": "2025-08-24",
+    "verified": true
+  },
+  {
+    "id": "youth_monthly_loan",
+    "name": "청년전용 보증부 월세대출",
+    "category": "금융상품",
+    "benefit": "월세·보증금 대출(청년 대상)",
+    "apply_url": "https://m.myhome.go.kr/hws/mbl/cont/selectYouthPolicyWarrantyMonthlyLoanView.do",
+    "source_domain": "myhome.go.kr",
+    "last_verified": "2025-08-24",
+    "verified": true
+  },
+  {
+    "id": "korean_employment_support",
+    "name": "국민취업지원제도",
+    "category": "지원제도",
+    "benefit": "구직촉진수당/취업지원 서비스",
+    "apply_url": "https://m.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systId=SI00000316",
+    "source_domain": "work24.go.kr",
+    "last_verified": "2025-08-24",
+    "verified": true
+  }
+]
