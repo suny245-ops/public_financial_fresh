@@ -18,10 +18,10 @@ import os
 
 # ───────────────────────────────────────────────
 # 데이터 불러오기: 엑셀 우선, 없으면 예비 데이터
-if os.path.exists("programs.xlsx"):
-    df = pd.read_excel("programs.xlsx")
+if os.path.exists("programs_full.csv"):
+    df = pd.read_excel("programs_full.csv")
 else:
-    st.error("엑셀 파일(programs.xlsx)을 찾을 수 없습니다. 기본 데이터로 실행합니다.")
+    st.error("엑셀 파일(programs_full.csv)을 찾을 수 없습니다. 기본 데이터로 실행합니다.")
     DATA = [
         {"name":"청년도약계좌","category":"금융상품","min_age":19,"max_age":34,
          "max_income":7500,"needs_non_homeowner":False,"employment_required":False,
@@ -265,6 +265,7 @@ if user_msg:
     st.session_state.chat.append(("assistant", answer))
     with st.chat_message("assistant"):
         st.markdown(answer)
+
 
 
 
