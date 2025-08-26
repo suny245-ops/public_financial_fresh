@@ -212,36 +212,49 @@ def rule_based_answer(q: str) -> str:
     return header + "\n" + body + hint
 
 
-# LLM 호출 (선택)
+# LLM 호출 (친절한 상담사 톤)
 def llm_answer(q: str) -> str:
     client = OpenAI(api_key=api_key)  # 위에서 읽은 api_key 사용
 
-
     def topn(tbl, n=6):
-        if tbl.empty: return "없음"
+        if tbl.empty: 
+            return "없음"
         rows = []
         for r in tbl[["name","category","benefit","apply_url"]].head(n).itertuples(index=False):
-            rows.append(f"- {r.name} ({r.category}) — {r.benefit} (링크: {r.apply_url})")
+            rows.append(f"- {r.name} ({r.category}) — {r.benefit} (👉 {r.apply_url})")
         return "\n".join(rows)
 
     context = (
-        f"[사용자 프로필] 나이={age}, 소득(만원)={income}, 주거={home}, 재직={emp}\n"
-        f"[완전 적합]\n{topn(perfect)}\n"
+        f"[사용자 프로필] 나이={age}, 소득={income}만원, 주거={home}, 재직={emp}\n\n"
+        f"[완전 적합]\n{topn(perfect)}\n\n"
         f"[거의 적합]\n{topn(near)}\n"
-        "규칙: 사실만 답하고, 모르면 공식 링크 확인하도록 안내. 과장/추정/단정 금지. 간결하고 한국어로."
     )
 
     messages = [
-        {"role":"system","content":"너는 청년 정책·금융 가이드를 한국어로 간결하게 제공하는 코치봇이다. 허위 정보 금지."},
-        {"role":"user","content": f"{context}\n\n질문: {q}"}
+        {
+            "role": "system",
+            "content": (
+                "너는 청년을 돕는 따뜻한 금융 상담사다. "
+                "친절하고 공감 어린 말투로 설명하되, 반드시 사실에 기반해라. "
+                "제도명은 풀어서 설명해주고, 이해하기 쉽게 요약해라. "
+                "답변 끝에는 짧은 응원 멘트를 덧붙여라. "
+                "허위 정보는 절대 하지 말고, 모르는 것은 공식 링크 확인을 권장해라."
+            )
+        },
+        {
+            "role": "user",
+            "content": f"{context}\n\n질문: {q}"
+        }
     ]
+
     resp = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
-        temperature=0.2,
-        max_tokens=600,
+        temperature=0.5,   # 조금 더 자연스럽게
+        max_tokens=700,
     )
     return resp.choices[0].message.content.strip()
+
 
 
 # 채팅 UI
@@ -266,6 +279,7 @@ if user_msg:
     st.session_state.chat.append(("assistant", answer))
     with st.chat_message("assistant"):
         st.markdown(answer)
+
 
 
 
