@@ -1,0 +1,25 @@
+﻿name,category,min_age,max_age,max_income,needs_non_homeowner,employment_required,benefit,popularity,difficulty,why_fit,apply_url
+청년도약계좌,금융상품,19,34,7500,FALSE,FALSE,5년간 최대 5천만원 목돈 + 정부 기여금,5,3,자산형성 시작 사회초년생 적합,https://www.fss.or.kr
+청년 전월세보증금 대출,금융상품,19,34,5000,TRUE,FALSE,"수도권 최대 1.2억원, 금리 2~3%",4,3,무주택 청년 주거안정,https://www.hf.go.kr
+내일배움카드,지원제도,19,34,6000,FALSE,FALSE,최대 500만원 직업훈련비 지원,5,2,역량 강화/이직 준비,https://www.hrd.go.kr
+국민취업지원제도,지원제도,19,34,4000,FALSE,FALSE,구직활동 지원금 + 취업알선,4,3,청년 구직자 소득지원,https://www.kua.go.kr
+청년월세지원,생활지원,19,34,3900,TRUE,FALSE,"월 최대 20만원, 12개월 지원(지자체별 상이)",5,2,월세 거주 청년 주거비 경감,https://www.bokjiro.go.kr
+청년희망키움통장,지원제도,19,34,2500,FALSE,TRUE,근로청년 저축 3배 적립 + 정부지원,4,3,저소득 근로 청년 자산형성,https://www.bokjiro.go.kr
+청년내일채움공제,지원제도,19,34,5000,FALSE,TRUE,2~3년 근속시 목돈 마련 지원,5,3,중소기업 재직 청년 자산형성,https://www.sbc.or.kr
+청년기본소득,지원제도,24,24,9999,FALSE,FALSE,분기별 25만원 지역화폐 지급(경기도 등),4,2,지자체별 청년 기본소득,https://www.gg.go.kr
+청년 교통비 지원,생활지원,19,34,3900,FALSE,FALSE,월 교통비 일부 지원(지자체별),3,2,대중교통 이용 청년 생활비 경감,https://www.bokjiro.go.kr
+청년 창업지원 자금,금융상품,19,39,8000,FALSE,FALSE,창업 초기자금 융자 및 컨설팅,4,4,창업을 준비하는 청년,https://www.kised.or.kr
+청년 문화패스,생활지원,19,34,3900,FALSE,FALSE,공연·전시 할인·지원,3,1,문화생활 향유 지원,https://www.mcst.go.kr
+청년 건강검진 지원,생활지원,19,34,3900,FALSE,FALSE,국민건강보험 검진비 일부 지원,4,1,청년 건강관리 지원,https://www.nhis.or.kr
+청년 심리상담 지원,생활지원,19,34,3900,FALSE,FALSE,심리상담 및 치료비 지원(지자체별),4,2,정신건강 관리 필요 청년,https://www.bokjiro.go.kr
+청년 농업창업 지원,지원제도,18,40,8000,FALSE,FALSE,영농정착 지원금 월 100만원 3년,4,4,귀농 청년 영농 지원,https://www.mafra.go.kr
+청년 주거급여 분리지급,생활지원,19,34,3000,TRUE,FALSE,부모와 별도 거주 청년 주거급여 분리지급,5,2,독립 청년 주거비 지원,https://www.bokjiro.go.kr
+청년전세임대주택,생활지원,19,39,4000,TRUE,FALSE,저소득 청년에게 전세임대주택 지원,5,3,무주택 저소득 청년 주거지원,https://www.myhome.go.kr
+신혼부부 전세대출 우대,금융상품,20,39,7000,TRUE,FALSE,신혼부부 대상 전세대출 우대금리,5,3,신혼 청년 주거안정,https://www.hf.go.kr
+청년 인턴십 지원,지원제도,19,34,5000,FALSE,FALSE,중소기업 청년 인턴십 지원금,4,2,취업 준비 청년 경험지원,https://www.work24.go.kr
+청년 해외취업 지원,지원제도,19,34,6000,FALSE,FALSE,K-Move 해외취업 알선 및 지원,3,3,해외취업 희망 청년,https://www.hrdkorea.or.kr
+청년 주거안정 월세대출,금융상품,19,34,5000,TRUE,FALSE,청년 대상 저금리 월세자금 대출,4,3,월세 거주 청년 지원,https://www.hf.go.kr
+청년 맞춤형 전·월세 대출,금융상품,19,34,7000,TRUE,FALSE,"최대 2억원 한도, 저금리 전·월세 대출",5,3,무주택 청년 주거안정,https://www.hf.go.kr
+청년 저축계좌,지원제도,15,39,2400,FALSE,TRUE,저소득 근로청년 저축액의 3배 적립,4,3,근로 청년 자산형성,https://www.bokjiro.go.kr
+청년 취업박람회 지원,지원제도,19,34,9999,FALSE,FALSE,취업박람회 참가비 및 교통비 지원,3,1,구직 청년 네트워킹 지원,https://www.work24.go.kr
+청년 금융교육 프로그램,지원제도,19,34,9999,FALSE,FALSE,금융 이해력 제고 위한 무료교육,3,1,금융역량 강화,https://www.fss.or.kr
