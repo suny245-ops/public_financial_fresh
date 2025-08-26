@@ -13,84 +13,24 @@ st.title("청년 맞춤형 정책 추천 — PoC (near-miss 포함 + 코치봇)"
 st.caption("조건 입력 → 완전 적합/거의 적합을 구분해 보여주고, 코치봇이 신청 팁을 안내합니다.")
 
 # ─────────────────────────────────────────────────────────
+import pandas as pd
+import os
 
+# ───────────────────────────────────────────────
+# 데이터 불러오기: 엑셀 우선, 없으면 예비 데이터
+if os.path.exists("programs.xlsx"):
+    df = pd.read_excel("programs.xlsx")
+else:
+    st.error("엑셀 파일(programs.xlsx)을 찾을 수 없습니다. 기본 데이터로 실행합니다.")
+    DATA = [
+        {"name":"청년도약계좌","category":"금융상품","min_age":19,"max_age":34,
+         "max_income":7500,"needs_non_homeowner":False,"employment_required":False,
+         "benefit":"5년간 최대 5천만원 목돈 + 정부 기여금","popularity":5,"difficulty":3,
+         "why_fit":"자산형성 시작 사회초년생 적합","apply_url":"https://www.fss.or.kr"},
+        # 필요시 기본 예비 데이터
+    ]
+    df = pd.DataFrame(DATA)
 
-# 샘플 데이터 (공식 링크 위주, 12종)
-DATA = [
-    # 1) 자산형성
-    {"name":"청년도약계좌","category":"금융상품","min_age":19,"max_age":34,
-     "max_income":7500,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"5년 적립 + 정부기여금(자산형성 지원)","popularity":5,"difficulty":3,
-     "why_fit":"장기적 자산형성 목적의 청년에게 적합","apply_url":"https://www.kinfa.or.kr/financialProduct/youthLeapAccount.do"},
-
-    # 2) 전세자금(청년)
-    {"name":"청년전용 버팀목 전세자금대출","category":"금융상품","min_age":19,"max_age":34,
-     "max_income":5000,"needs_non_homeowner":True,"employment_required":False,
-     "benefit":"무주택 청년 대상 전세자금 저리 대출","popularity":5,"difficulty":3,
-     "why_fit":"무주택 전세입주 계획이 있는 청년에게 적합","apply_url":"https://www.myhome.go.kr/hws/portal/cont/selectYouthPolicyYouthOnlyCrutchLoanView.do"},
-
-    # 3) 월세/보증금 대출(청년)
-    {"name":"청년전용 보증부 월세대출","category":"금융상품","min_age":19,"max_age":34,
-     "max_income":5000,"needs_non_homeowner":True,"employment_required":False,
-     "benefit":"전월세보증금 및 월세 저리 대출(청년)","popularity":4,"difficulty":3,
-     "why_fit":"월세 거주·이주 계획 청년에게 적합","apply_url":"https://m.myhome.go.kr/hws/mbl/cont/selectYouthPolicyWarrantyMonthlyLoanView.do"},
-
-    # 4) 청약통장(청년 우대 상품)
-    {"name":"청년 주택드림 청약통장(우대)","category":"금융상품","min_age":19,"max_age":34,
-     "max_income":6000,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"청년 대상 청약통장 우대(보증료 할인 등 연계)","popularity":4,"difficulty":2,
-     "why_fit":"내 집 마련 준비 초기 단계 청년에게 적합","apply_url":"https://www.myhome.go.kr/hws/portal/cont/selectYouthPolicyYouthPassbookView.do"},
-
-    # 5) 직업훈련비(국민내일배움카드)
-    {"name":"국민내일배움카드","category":"지원제도","min_age":19,"max_age":64,
-     "max_income":9000,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"직업훈련비 지원(훈련과정 다수·온라인 신청)","popularity":5,"difficulty":2,
-     "why_fit":"역량 강화·이직/취업 준비 청년에게 적합","apply_url":"https://m.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systId=SI00000351"},
-
-    # 6) 구직지원(국민취업지원제도)
-    {"name":"국민취업지원제도","category":"지원제도","min_age":19,"max_age":69,
-     "max_income":5000,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"구직촉진수당·취업알선 등 맞춤형 취업지원","popularity":5,"difficulty":3,
-     "why_fit":"소득·취업취약 청년의 구직안정 지원","apply_url":"https://m.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systId=SI00000316"},
-
-    # 7) 저축지원(청년내일저축계좌)
-    {"name":"청년내일저축계좌","category":"생활지원","min_age":19,"max_age":34,
-     "max_income":3000,"needs_non_homeowner":False,"employment_required":True,
-     "benefit":"근로청년 저축액에 정부매칭 지원(자산형성)","popularity":4,"difficulty":3,
-     "why_fit":"소득·근로활동이 있는 청년의 목돈 마련에 적합","apply_url":"https://www.bokjiro.go.kr/ssis-teu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060"},
-
-    # 8) 주거급여(청년 분리지급)
-    {"name":"주거급여 청년가구 분리지급","category":"생활지원","min_age":19,"max_age":30,
-     "max_income":3000,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"수급가구 내 분리거주 청년에게 주거급여 별도 지급","popularity":4,"difficulty":3,
-     "why_fit":"부모와 떨어져 거주하는 저소득 청년의 임차부담 완화","apply_url":"https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003201"},
-
-    # 9) 전세보증금 반환보증 보증료 ‘할인’(국가연계)
-    {"name":"청년 전세보증금 반환보증 보증료 할인","category":"생활지원","min_age":19,"max_age":34,
-     "max_income":5000,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"HUG 반환보증 보증료 할인(소득 4천 이하는 60% 등)","popularity":3,"difficulty":2,
-     "why_fit":"보증 가입 청년의 보증료 부담 경감","apply_url":"https://www.myhome.go.kr/hws/portal/cont/selectYouthPolicyGuaranteeFeeDisView.do"},
-
-    # 10) 전세보증금 반환보증 보증료 ‘지원’(국가연계)
-    {"name":"청년 보증료 지원(전세보증금 반환보증)","category":"생활지원","min_age":19,"max_age":34,
-     "max_income":5000,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"저소득 청년 보증료 일부 지원(반환보증 가입 시)","popularity":3,"difficulty":2,
-     "why_fit":"전세보증 가입 청년의 실보증료 절감","apply_url":"https://m.myhome.go.kr/hws/mbl/cont/selectYouthPolicyGuaranteeFeeSupView.do"},
-
-    # 11) (지자체 예시) 서울시 반환보증 보증료 지원
-    {"name":"서울시 전세보증금 반환보증 보증료 지원","category":"생활지원","min_age":19,"max_age":39,
-     "max_income":5000,"needs_non_homeowner":False,"employment_required":False,
-     "benefit":"청년·신혼부부 대상 보증료 지원(최대 40만원 등)","popularity":3,"difficulty":2,
-     "why_fit":"서울 거주 청년의 전세보증료 부담 경감","apply_url":"https://housing.seoul.go.kr/site/main/content/sh01_061030"},
-
-    # 12) (주거 일반) 청년버팀목 전세자금 – 종합 안내 허브
-    {"name":"청년버팀목·월세대출 종합 안내","category":"금융상품","min_age":19,"max_age":34,
-     "max_income":5000,"needs_non_homeowner":True,"employment_required":False,
-     "benefit":"전세·월세 대출, 보증료 우대/지원 항목 한눈에","popularity":4,"difficulty":2,
-     "why_fit":"주거대출·보증 관련 정보를 한번에 탐색","apply_url":"https://www.myhome.go.kr/hws/portal/cont/selectYouthPolicyPublicSupPrivateView.do"},
-]
-
-df = pd.DataFrame(DATA)
 
 # ─────────────────────────────────────────────────────────
 # 안전 링크 필터 추가
@@ -325,6 +265,7 @@ if user_msg:
     st.session_state.chat.append(("assistant", answer))
     with st.chat_message("assistant"):
         st.markdown(answer)
+
 
 
 
